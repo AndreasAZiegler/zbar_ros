@@ -33,6 +33,10 @@
 #include "pluginlib/class_list_macros.h"
 #include "std_msgs/String.h"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 namespace zbar_ros
 {
 
@@ -54,7 +58,7 @@ namespace zbar_ros
     if (throttle_ > 0.0){
       clean_timer_ = nh_.createTimer(ros::Duration(10.0), boost::bind(&BarcodeReaderNodelet::cleanCb, this));
     }
-  };
+  }
 
   void BarcodeReaderNodelet::connectCb()
   {
@@ -76,10 +80,22 @@ namespace zbar_ros
 
   void BarcodeReaderNodelet::imageCb(const sensor_msgs::ImageConstPtr &image)
   {
+    NODELET_INFO("Image received");
     cv_bridge::CvImageConstPtr cv_image;
-    cv_image = cv_bridge::toCvShare(image, "mono16");
+    cv_image = cv_bridge::toCvShare(image, "bgr8");
 
-    zbar::Image zbar_image(cv_image->image.cols, cv_image->image.rows, "Y800", cv_image->image.data,
+		// DEBUG Displays cv_image
+		/*
+		cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+		cv::imshow( "Display window", cv_image->image );                   // Show our image inside it.
+		cv::waitKey(1);                                          // Wait for a keystroke in the window
+		*/
+
+    // Convert to GREY scale image
+    cv::Mat grey;
+    cv::cvtColor(cv_image->image, grey, cv::COLOR_BGR2GRAY);
+
+    zbar::Image zbar_image(cv_image->image.cols, cv_image->image.rows, "Y800", grey.data,
         cv_image->image.cols * cv_image->image.rows);
     scanner_.scan(zbar_image);
 
