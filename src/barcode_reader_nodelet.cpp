@@ -95,8 +95,7 @@ namespace zbar_ros
     cv::Mat grey;
     cv::cvtColor(cv_image->image, grey, cv::COLOR_BGR2GRAY);
 
-    zbar::Image zbar_image(cv_image->image.cols, cv_image->image.rows, "Y800", grey.data,
-        cv_image->image.cols * cv_image->image.rows);
+    zbar::Image zbar_image(grey.cols, grey.rows, "Y800", grey.data, grey.cols * grey.rows);
     scanner_.scan(zbar_image);
 
     // iterate over all barcode readings from image
